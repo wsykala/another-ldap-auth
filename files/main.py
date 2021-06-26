@@ -78,7 +78,7 @@ def login(username, password):
         logs.error({'message': 'Username or password empty.'})
         return False
 
-    if bruteForce.isIpBlocked(getUserIp()):
+    if bruteForce.is_ip_blocked(getUserIp()):
         return False
 
     try:
@@ -176,7 +176,7 @@ def login(username, password):
         if aldap.authenticateUser(username, password):
             cache.addUser(username, password)
         else:
-            bruteForce.addFailure(getUserIp())
+            bruteForce.add_failure(getUserIp())
             return False
 
     # Validate user via matching users

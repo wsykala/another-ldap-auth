@@ -35,6 +35,7 @@ class Logs:
 
 	def _print_fields(self, fields: dict[str, Any]) -> None:
 		if self.format == LogFormat.JSON:
+
 			print(json.dumps(fields))
 		else:
 			print(' - '.join(map(str, fields.values())))
