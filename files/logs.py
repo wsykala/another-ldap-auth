@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any
 from os import environ
 
 from flask import request
@@ -9,22 +9,22 @@ from flask import request
 class Logs:
 	def __init__(self, object_name: str) -> None:
 		self.level = environ.get('LOG_LEVEL', LogLevel.INFO)
-		self.format = environ.get('LOG_FORMAT', LogFormats.TEXT)
+		self.format = environ.get('LOG_FORMAT', LogFormat.TEXT)
 		self.object_name = object_name
 
-	def error(self, extra_fields: Dict[str, Any]) -> None:
+	def error(self, extra_fields: dict[str, Any]) -> None:
 		if self.level in [LogLevel.INFO, LogLevel.WARNING, LogLevel.ERROR]:
 			self.__print__(LogLevel.ERROR, extra_fields)
 
-	def warning(self, extra_fields: Dict[str, Any]) -> None:
+	def warning(self, extra_fields: dict[str, Any]) -> None:
 		if self.level in [LogLevel.INFO, LogLevel.WARNING]:
 			self.__print__(LogLevel.WARNING, extra_fields)
 
-	def info(self, extra_fields: Dict[str, Any]) -> None:
+	def info(self, extra_fields: dict[str, Any]) -> None:
 		if self.level == LogLevel.INFO:
 			self.__print__(LogLevel.INFO, extra_fields)
 
-	def __print__(self, level: str, extra_fields: Dict[str, Any]) -> None:
+	def __print__(self, level: str, extra_fields: dict[str, Any]) -> None:
 		self._print_fields({
 			'date': self._now(),
 			'level': level,
@@ -33,8 +33,8 @@ class Logs:
 			**extra_fields
 		})
 
-	def _print_fields(self, fields: Dict[str, Any]) -> None:
-		if self.format == LogFormats.JSON:
+	def _print_fields(self, fields: dict[str, Any]) -> None:
+		if self.format == LogFormat.JSON:
 			print(json.dumps(fields))
 		else:
 			print(' - '.join(map(str, fields.values())))
@@ -44,7 +44,7 @@ class Logs:
 		return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 	@staticmethod
-	def _get_ip_and_referrer() -> Dict[str, Any]:
+	def _get_ip_and_referrer() -> dict[str, Any]:
 		try:
 			ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
 			return {'ip': ip, 'referrer': request.headers.get('Referer')}
@@ -58,6 +58,6 @@ class LogLevel:
 	ERROR = 'ERROR'
 
 
-class LogFormats:
+class LogFormat:
 	TEXT = 'TEXT'
 	JSON = 'JSON'

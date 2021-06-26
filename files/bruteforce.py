@@ -1,18 +1,25 @@
 from datetime import datetime, timedelta
-from logs import Logs
+
+from files.logs import Logs
+
 
 class BruteForce:
-	def __init__(self, enabled:bool, expirationSeconds:int, blockAfterFailures:int):
+	def __init__(
+			self,
+			enabled: bool,
+			expiration_in_seconds: int,
+			block_after_failures: int
+	) -> None:
 		self.database = {}
 		self.enabled = enabled
-		self.expirationSeconds = expirationSeconds
-		self.blockAfterFailures = blockAfterFailures
+		self.expiration_in_seconds = expiration_in_seconds
+		self.block_after_failures = block_after_failures
 		self.logs = Logs(self.__class__.__name__)
 
-	def addFailure(self, ip:str):
-		'''
-			Increase IP failure
-		'''
+	def addFailure(self, ip: str) -> bool:
+		"""
+		Increase IP failure
+		"""
 		# Check if brute force protection is enabled
 		if not self.enabled:
 			return False
@@ -20,7 +27,7 @@ class BruteForce:
 		# Check if this is the first time that the IP will be in the database
 		if ip not in self.database:
 			self.logs.info({'message':'Start IP failure counter.', 'ip': ip, 'failures': '1'})
-			blockUntil = datetime.now() + timedelta(seconds=self.expirationSeconds)
+			blockUntil = datetime.now() + timedelta(seconds=self.expiration_in_seconds)
 			self.database[ip] = {'counter': 1, 'blockUntil': blockUntil}
 		else:
 			# Check if the IP expire and renew the database for that IP
@@ -35,16 +42,16 @@ class BruteForce:
 			self.logs.info({'message':'Increase IP failure counter.', 'ip': ip, 'failures': str(self.database[ip]['counter'])})
 
 			# The IP already match the amount of failures, block the IP
-			if self.database[ip]['counter'] >= self.blockAfterFailures:
-				self.database[ip]['blockUntil'] = datetime.now() + timedelta(seconds=self.expirationSeconds)
+			if self.database[ip]['counter'] >= self.block_after_failures:
+				self.database[ip]['blockUntil'] = datetime.now() + timedelta(seconds=self.expiration_in_seconds)
 				self.logs.warning({'message':'IP blocked.', 'ip': ip, 'blockUntil': str(self.database[ip]['blockUntil'])})
 
 		return False
 
-	def isIpBlocked(self, ip:str) -> bool:
-		'''
-			Returns True if the IP is blocked, False otherwise
-		'''
+	def isIpBlocked(self, ip: str) -> bool:
+		"""
+		Returns True if the IP is blocked, False otherwise
+		"""
 		# Check if brute force protection is enabled
 		if not self.enabled:
 			return False
@@ -54,7 +61,7 @@ class BruteForce:
 			return False
 
 		# The IP is on the database, check the amount of failures
-		if self.database[ip]['counter'] >= self.blockAfterFailures:
+		if self.database[ip]['counter'] >= self.block_after_failures:
 			self.logs.warning({'message':'The IP is blocked.', 'ip': ip, 'blockUntil': str(self.database[ip]['blockUntil'])})
 
 			# Check if the IP expire and remove from the database
